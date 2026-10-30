@@ -1,4 +1,3 @@
-
 package com.raishazahra.frontend.objects;
 
 import com.badlogic.gdx.Gdx;
@@ -6,13 +5,16 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 
 import com.raishazahra.frontend.objects.bullets.Bullet;
 import com.raishazahra.frontend.objects.enemies.Enemy;
 import com.raishazahra.frontend.objects.items.Item;
 import com.raishazahra.frontend.objects.items.ItemType;
+import com.raishazahra.frontend.objects.patterns.ShootingPattern;
 import com.raishazahra.frontend.systems.AssetManager;
 import com.raishazahra.frontend.systems.AudioSystem;
+import com.raishazahra.frontend.systems.BulletManager;
 import com.raishazahra.frontend.systems.EntityFactory;
 
 public class Player extends GameObject {
@@ -24,6 +26,8 @@ public class Player extends GameObject {
     private int spellCards;
     private long score;
     private int currentDir = 0;
+
+    private ShootingPattern shootingPattern;
 
     public Player(String name, int hp, int power, int spellCards) {
         this(280, 40, name, hp, power, spellCards);
@@ -45,6 +49,7 @@ public class Player extends GameObject {
         this.power = power;
         this.spellCards = spellCards;
         this.score = 0;
+        this.shootingPattern = null;
     }
 
     @Override
@@ -86,26 +91,50 @@ public class Player extends GameObject {
         if (dx < 0) {
             if (currentDir != -1) {
                 currentDir = -1;
+
                 Animation<TextureRegion> anim =
                     assets.getAnimation("player_left");
 
-                if (anim != null) setAnimation(anim);
+                if (anim != null) {
+                    setAnimation(anim);
+                }
             }
         } else if (dx > 0) {
             if (currentDir != 1) {
                 currentDir = 1;
+
                 Animation<TextureRegion> anim =
                     assets.getAnimation("player_right");
 
-                if (anim != null) setAnimation(anim);
+                if (anim != null) {
+                    setAnimation(anim);
+                }
             }
         } else if (currentDir != 0) {
             currentDir = 0;
+
             Animation<TextureRegion> anim =
                 assets.getAnimation("player_idle");
 
-            if (anim != null) setAnimation(anim);
+            if (anim != null) {
+                setAnimation(anim);
+            }
         }
+    }
+
+    @Override
+    public Rectangle getCoreHitbox() {
+        return new Rectangle(
+            x + width / 2f - 4f,
+            y + height / 2f - 4f,
+            8f,
+            8f
+        );
+    }
+
+    @Override
+    public Rectangle getGrazeHitbox() {
+        return new Rectangle(x, y, width, height);
     }
 
     public Bullet shootBullet() {
@@ -115,15 +144,44 @@ public class Player extends GameObject {
             name + " shoots bullet dealing " + damage + " DMG!"
         );
 
-        // Play the firing sound.
         AudioSystem.getInstance().playSound("shoot");
 
-        // Create a bullet with its own position and state.
         return EntityFactory.createPlayerBullet(
-            x + width / 2f - 8,
+            x + width / 2f - 8f,
             y + height,
             damage
         );
+    }
+
+    public void shootBullet(BulletManager bulletManager) {
+        if (bulletManager == null) {
+            return;
+        }
+
+        int damage = 10 + power;
+
+        System.out.println(
+            name + " shoots bullet dealing " + damage + " DMG!"
+        );
+
+        AudioSystem.getInstance().playSound("shoot");
+
+        if (shootingPattern != null) {
+            shootingPattern.execute(
+                x + width / 2f - 8f,
+                y + height,
+                bulletManager,
+                true
+            );
+        } else {
+            bulletManager.spawnPlayerBullet(
+                x + width / 2f - 8f,
+                y + height,
+                0f,
+                400f,
+                damage
+            );
+        }
     }
 
     @Override
@@ -159,7 +217,9 @@ public class Player extends GameObject {
             case BOMB:
                 spellCards++;
                 addScore(item.getScoreValue());
-                System.out.println("BOMB collected. SpellCards: " + spellCards);
+                System.out.println(
+                    "BOMB collected. SpellCards: " + spellCards
+                );
                 break;
 
             case LIFE:
@@ -173,8 +233,10 @@ public class Player extends GameObject {
     public void takeDamage(int damage) {
         if (damage > 0) {
             hp = Math.max(0, hp - damage);
+
             System.out.println(
-                name + " took " + damage + " damage! HP: " + hp + "/" + maxHp
+                name + " took " + damage
+                    + " damage! HP: " + hp + "/" + maxHp
             );
         }
     }
@@ -189,20 +251,55 @@ public class Player extends GameObject {
         }
     }
 
-    public String getName() { return name; }
-    public int getHp() { return hp; }
-    public int getMaxHp() { return maxHp; }
-    public int getPower() { return power; }
-    public int getSpellCards() { return spellCards; }
-    public long getScore() { return score; }
-
-    public void addScore(long points) {
-        if (points > 0) score += points;
+    public String getName() {
+        return name;
     }
 
-    public void setName(String name) { this.name = name; }
-    public void setHp(int hp) { this.hp = Math.max(0, hp); }
-    public void setPower(int power) { this.power = power; }
+    public int getHp() {
+        return hp;
+    }
+
+    public int getMaxHp() {
+        return maxHp;
+    }
+
+    public int getPower() {
+        return power;
+    }
+
+    public int getSpellCards() {
+        return spellCards;
+    }
+
+    public long getScore() {
+        return score;
+    }
+
+    public ShootingPattern getShootingPattern() {
+        return shootingPattern;
+    }
+
+    public void setShootingPattern(ShootingPattern shootingPattern) {
+        this.shootingPattern = shootingPattern;
+    }
+
+    public void addScore(long points) {
+        if (points > 0) {
+            score += points;
+        }
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setHp(int hp) {
+        this.hp = Math.max(0, Math.min(maxHp, hp));
+    }
+
+    public void setPower(int power) {
+        this.power = power;
+    }
 
     public void setSpellCards(int spellCards) {
         this.spellCards = spellCards;
