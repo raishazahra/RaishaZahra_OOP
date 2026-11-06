@@ -1,29 +1,32 @@
+
 package com.raishazahra.frontend.systems;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.raishazahra.frontend.objects.GameObject;
 import com.raishazahra.frontend.objects.Player;
 import com.raishazahra.frontend.objects.bullets.Bullet;
 import com.raishazahra.frontend.objects.enemies.Enemy;
 import com.raishazahra.frontend.objects.items.Item;
+import com.raishazahra.frontend.objects.items.ItemType;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CollisionReferee {
 
+    public CollisionReferee() {
+    }
+
     public void resolveCollisions(
         Player player,
         List<GameObject> entities,
-        BulletManager bulletManager) {
+        BulletManager bulletManager
+    ) {
 
         if (player == null || entities == null || bulletManager == null) {
             return;
         }
 
         List<GameObject> newDrops = new ArrayList<>();
-
-
 
         for (Bullet bullet : bulletManager.getActivePlayerBullets()) {
 
@@ -33,60 +36,73 @@ public class CollisionReferee {
 
             for (GameObject entity : entities) {
 
-                if (entity instanceof Enemy enemy && !enemy.isDestroyed()) {
+                if (entity instanceof Enemy enemy
+                    && !enemy.isDestroyed()
+                    && enemy.isAlive()) {
 
                     if (bullet.getCoreHitbox().overlaps(
-                        enemy.getCoreHitbox())) {
+                        enemy.getCoreHitbox()
+                    )) {
 
-                        boolean defeated =
-                            enemy.takeDamage(bullet.getDamage());
+                        boolean wasAlive = enemy.isAlive();
 
-                        if (defeated) {
+                        enemy.takeDamage(bullet.getDamage());
+
+                        if (wasAlive && !enemy.isAlive()) {
+
+                            // Add enemy score to player
                             player.addScore(enemy.getScoreValue());
 
-                            Item powerDrop = EntityFactory.createPowerItem(
+                            // Create POWER item drop
+                            Item powerDrop = EntityFactory.createItem(
                                 enemy.getX(),
-                                enemy.getY()
+                                enemy.getY(),
+                                ItemType.POWER
                             );
 
-                            newDrops.add(powerDrop);
+                            if (powerDrop != null) {
+                                newDrops.add(powerDrop);
+                            }
                         }
 
+                        // Destroy bullet after hitting enemy
                         bullet.destroy();
+
                         break;
                     }
                 }
             }
         }
 
+        if (!player.isDestroyed()) {
+
+            for (Bullet bullet : bulletManager.getActiveEnemyBullets()) {
+
+                if (bullet.isDestroyed()) {
+                    continue;
+                }
 
 
-        for (Bullet bullet : bulletManager.getActiveEnemyBullets()) {
-
-            if (bullet.isDestroyed()) {
-                continue;
-            }
-
-            if (!player.isDestroyed()) {
-
-                Rectangle bulletHitbox = bullet.getCoreHitbox();
-                Rectangle playerCore = player.getCoreHitbox();
-                Rectangle playerGraze = player.getGrazeHitbox();
-
-
-
-                if (bulletHitbox.overlaps(playerCore)) {
+                if (bullet.getCoreHitbox().overlaps(
+                    player.getCoreHitbox()
+                )) {
 
                     player.takeDamage(bullet.getDamage());
+
                     bullet.destroy();
 
+                    continue;
+                }
 
 
-                } else if (!bullet.hasBeenGrazed()
-                    && bulletHitbox.overlaps(playerGraze)) {
+                if (!bullet.hasBeenGrazed()
+                    && bullet.getCoreHitbox().overlaps(
+                    player.getGrazeHitbox()
+                )) {
 
                     bullet.setGrazed(true);
-                    player.addScore(50);
+
+                    player.addGraze();
 
                     System.out.println(
                         "[CollisionReferee] GRAZE! "
@@ -98,7 +114,6 @@ public class CollisionReferee {
         }
 
 
-
         for (GameObject entity : entities) {
 
             if (entity.isDestroyed()) {
@@ -106,30 +121,31 @@ public class CollisionReferee {
             }
 
             // Case A: Item Collection
-
             if (entity instanceof Item item) {
 
                 if (item.getCoreHitbox().overlaps(
-                    player.getCoreHitbox())
-                    || item.getCoreHitbox().overlaps(
-                    player.getGrazeHitbox())) {
+                    player.getCoreHitbox()
+                ) || item.getCoreHitbox().overlaps(
+                    player.getGrazeHitbox()
+                )) {
 
                     player.collectItem(item);
-                    item.destroy();
                 }
             }
 
-
-
+            // Case B: Physical Enemy Contact
             else if (entity instanceof Enemy enemy) {
 
-                if (player.getCoreHitbox().overlaps(
-                    enemy.getCoreHitbox())) {
+                if (!enemy.isDestroyed()
+                    && player.getCoreHitbox().overlaps(
+                    enemy.getCoreHitbox()
+                )) {
 
                     player.takeDamage(10);
                 }
             }
         }
+
 
         entities.addAll(newDrops);
     }
