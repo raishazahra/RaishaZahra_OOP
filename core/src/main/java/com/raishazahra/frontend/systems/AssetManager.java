@@ -1,4 +1,3 @@
-
 package com.raishazahra.frontend.systems;
 
 import com.badlogic.gdx.Gdx;
@@ -27,17 +26,29 @@ public class AssetManager {
         if (instance == null) {
             instance = new AssetManager();
         }
+
         return instance;
     }
 
     public Texture loadTexture(String filename) {
+
         if (!textureMap.containsKey(filename)) {
-            if (Gdx.files != null && Gdx.files.internal(filename).exists()) {
-                Texture texture = new Texture(Gdx.files.internal(filename));
+
+            if (Gdx.files != null &&
+                Gdx.files.internal(filename).exists()) {
+
+                Texture texture =
+                    new Texture(Gdx.files.internal(filename));
+
                 textureMap.put(filename, texture);
+
             } else {
-                Gdx.app.error("AssetManager",
-                    "Texture not found: " + filename);
+
+                Gdx.app.error(
+                    "AssetManager",
+                    "Texture not found: " + filename
+                );
+
                 return null;
             }
         }
@@ -45,7 +56,10 @@ public class AssetManager {
         return textureMap.get(filename);
     }
 
-    public void registerRegion(String key, TextureRegion region) {
+    public void registerRegion(
+        String key,
+        TextureRegion region) {
+
         if (region != null) {
             textureRegionMap.put(key, region);
         }
@@ -57,21 +71,30 @@ public class AssetManager {
         int tileWidth,
         int tileHeight,
         int row,
-        int col
-    ) {
+        int col) {
+
         Texture texture = loadTexture(filename);
 
         if (texture == null) return;
 
         TextureRegion[][] grid =
-            TextureRegion.split(texture, tileWidth, tileHeight);
+            TextureRegion.split(
+                texture,
+                tileWidth,
+                tileHeight
+            );
 
-        if (row >= 0 && row < grid.length
-            && col >= 0 && col < grid[row].length) {
+        if (row >= 0 && row < grid.length &&
+            col >= 0 && col < grid[row].length) {
+
             textureRegionMap.put(key, grid[row][col]);
+
         } else {
-            Gdx.app.error("AssetManager",
-                "Invalid region index for key: " + key);
+
+            Gdx.app.error(
+                "AssetManager",
+                "Invalid region index for key: " + key
+            );
         }
     }
 
@@ -82,11 +105,13 @@ public class AssetManager {
         int tileHeight,
         int row,
         int numFrames,
-        float frameDuration
-    ) {
+        float frameDuration) {
+
         registerAnimationFromSheet(
-            key, filename, tileWidth, tileHeight,
-            row, 0, numFrames, frameDuration,
+            key, filename,
+            tileWidth, tileHeight,
+            row, 0, numFrames,
+            frameDuration,
             Animation.PlayMode.LOOP
         );
     }
@@ -100,24 +125,33 @@ public class AssetManager {
         int startCol,
         int numFrames,
         float frameDuration,
-        Animation.PlayMode playMode
-    ) {
+        Animation.PlayMode playMode) {
+
         Texture texture = loadTexture(filename);
 
         if (texture == null) return;
 
         TextureRegion[][] grid =
-            TextureRegion.split(texture, tileWidth, tileHeight);
+            TextureRegion.split(
+                texture,
+                tileWidth,
+                tileHeight
+            );
 
-        if (row < 0 || row >= grid.length
-            || startCol < 0
-            || startCol + numFrames > grid[row].length) {
-            Gdx.app.error("AssetManager",
-                "Invalid animation frames for key: " + key);
+        if (row < 0 || row >= grid.length ||
+            startCol < 0 ||
+            startCol + numFrames > grid[row].length) {
+
+            Gdx.app.error(
+                "AssetManager",
+                "Invalid animation frames for key: " + key
+            );
+
             return;
         }
 
-        TextureRegion[] frames = new TextureRegion[numFrames];
+        TextureRegion[] frames =
+            new TextureRegion[numFrames];
 
         for (int i = 0; i < numFrames; i++) {
             frames[i] = grid[row][startCol + i];
@@ -127,6 +161,7 @@ public class AssetManager {
             new Animation<>(frameDuration, frames);
 
         animation.setPlayMode(playMode);
+
         animationMap.put(key, animation);
         textureRegionMap.put(key, frames[0]);
     }
@@ -140,12 +175,15 @@ public class AssetManager {
         int numFrames,
         float frameDuration,
         boolean flipX,
-        boolean flipY
-    ) {
+        boolean flipY) {
+
         registerFlippedAnimationFromSheet(
-            key, filename, tileWidth, tileHeight,
-            row, 0, numFrames, frameDuration,
-            Animation.PlayMode.LOOP, flipX, flipY
+            key, filename,
+            tileWidth, tileHeight,
+            row, 0, numFrames,
+            frameDuration,
+            Animation.PlayMode.LOOP,
+            flipX, flipY
         );
     }
 
@@ -160,30 +198,41 @@ public class AssetManager {
         float frameDuration,
         Animation.PlayMode playMode,
         boolean flipX,
-        boolean flipY
-    ) {
+        boolean flipY) {
+
         Texture texture = loadTexture(filename);
 
         if (texture == null) return;
 
         TextureRegion[][] grid =
-            TextureRegion.split(texture, tileWidth, tileHeight);
+            TextureRegion.split(
+                texture,
+                tileWidth,
+                tileHeight
+            );
 
-        if (row < 0 || row >= grid.length
-            || startCol < 0
-            || startCol + numFrames > grid[row].length) {
-            Gdx.app.error("AssetManager",
-                "Invalid flipped animation frames for key: " + key);
+        if (row < 0 || row >= grid.length ||
+            startCol < 0 ||
+            startCol + numFrames > grid[row].length) {
+
+            Gdx.app.error(
+                "AssetManager",
+                "Invalid flipped animation frames for key: " + key
+            );
+
             return;
         }
 
-        TextureRegion[] frames = new TextureRegion[numFrames];
+        TextureRegion[] frames =
+            new TextureRegion[numFrames];
 
         for (int i = 0; i < numFrames; i++) {
+
             TextureRegion frame =
                 new TextureRegion(grid[row][startCol + i]);
 
             frame.flip(flipX, flipY);
+
             frames[i] = frame;
         }
 
@@ -191,6 +240,7 @@ public class AssetManager {
             new Animation<>(frameDuration, frames);
 
         animation.setPlayMode(playMode);
+
         animationMap.put(key, animation);
         textureRegionMap.put(key, frames[0]);
     }
@@ -208,6 +258,7 @@ public class AssetManager {
     }
 
     public void init() {
+
         // Player animations
         registerAnimationFromSheet(
             "player_idle", "player.png",
@@ -259,7 +310,7 @@ public class AssetManager {
             Animation.PlayMode.LOOP
         );
 
-        // Bullet regions
+        // Amulet bullets
         registerRegionFromSheet(
             "bullet_amulet", "amulet_reimu.png",
             16, 16, 0, 0
@@ -270,30 +321,61 @@ public class AssetManager {
             16, 16, 1, 0
         );
 
+        // Danmaku bullets
         registerRegionFromSheet(
             "bullet_danmaku", "bullets_small.png",
             16, 16, 2, 3
         );
 
-        // Item regions
         registerRegionFromSheet(
-            "item_power", "items.png", 16, 16, 0, 0
+            "bullet_danmaku_blue", "bullets_small.png",
+            16, 16, 2, 3
         );
 
         registerRegionFromSheet(
-            "item_point", "items.png", 16, 16, 0, 1
+            "bullet_danmaku_red", "bullets_small.png",
+            16, 16, 2, 6
         );
 
         registerRegionFromSheet(
-            "item_bomb", "items.png", 16, 16, 0, 3
+            "bullet_danmaku_purple", "bullets_small.png",
+            16, 16, 2, 4
         );
 
         registerRegionFromSheet(
-            "item_life", "items.png", 16, 16, 0, 5
+            "bullet_danmaku_orange", "bullets_small.png",
+            16, 16, 2, 15
+        );
+
+        registerRegionFromSheet(
+            "bullet_danmaku_green", "bullets_small.png",
+            16, 16, 2, 10
+        );
+
+        // Items
+        registerRegionFromSheet(
+            "item_power", "items.png",
+            16, 16, 0, 0
+        );
+
+        registerRegionFromSheet(
+            "item_point", "items.png",
+            16, 16, 0, 1
+        );
+
+        registerRegionFromSheet(
+            "item_bomb", "items.png",
+            16, 16, 0, 3
+        );
+
+        registerRegionFromSheet(
+            "item_life", "items.png",
+            16, 16, 0, 5
         );
     }
 
     public void dispose() {
+
         for (Texture texture : textureMap.values()) {
             if (texture != null) {
                 texture.dispose();

@@ -1,49 +1,35 @@
-
 package com.raishazahra.frontend.objects.enemies;
-
 import com.badlogic.gdx.graphics.Color;
 import com.raishazahra.frontend.objects.Collidable;
 import com.raishazahra.frontend.objects.Player;
 import com.raishazahra.frontend.objects.patterns.ShootingPattern;
+import com.raishazahra.frontend.objects.patterns.entityStrategy.EntityMovementPattern;
 import com.raishazahra.frontend.objects.patterns.shootingStrategy.SpreadShot;
-import com.raishazahra.frontend.systems.BulletManager;
-
 public class Boss extends Enemy {
-
-    private ShootingPattern shootingPattern;
-
     public Boss(float x, float y) {
         this(x, y, "Rumia", 100);
     }
-
+    public Boss(String name, int hp) {
+        this(176, 420, name, hp);
+    }
     public Boss(float x, float y, String name, int hp) {
-        super(x, y, 64, 64, Color.RED, name, hp, 1000L);
-        this.shootingPattern = new SpreadShot(200f, 3, 30f);
+        this(
+            x, y, name, hp,
+            new SpreadShot(200f, 3, 30f),
+            null
+        );
     }
-
-    public void shootBullet(BulletManager bulletManager) {
-        if (bulletManager == null || !isAlive()) {
-            return;
-        }
-
-        if (shootingPattern != null) {
-            shootingPattern.execute(
-                x + width / 2f,
-                y,
-                bulletManager,
-                false
-            );
-        }
+    public Boss(
+        float x, float y, String name, int hp,
+        ShootingPattern shootingPattern,
+        EntityMovementPattern movementPattern
+    ) {
+        super(
+            x, y, 64, 64, Color.RED,
+            name, hp, 1000L,
+            shootingPattern, movementPattern
+        );
     }
-
-    public ShootingPattern getShootingPattern() {
-        return shootingPattern;
-    }
-
-    public void setShootingPattern(ShootingPattern shootingPattern) {
-        this.shootingPattern = shootingPattern;
-    }
-
     @Override
     public void onCollision(Collidable other) {
         if (other instanceof Player) {

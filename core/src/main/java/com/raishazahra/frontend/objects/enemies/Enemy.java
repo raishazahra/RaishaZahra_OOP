@@ -1,107 +1,56 @@
 package com.raishazahra.frontend.objects.enemies;
-
 import com.badlogic.gdx.graphics.Color;
-import com.raishazahra.frontend.objects.GameObject;
+import com.raishazahra.frontend.objects.EntityShooter;
 import com.raishazahra.frontend.objects.Player;
-
-public class Enemy extends GameObject {
-
+import com.raishazahra.frontend.objects.patterns.ShootingPattern;
+import com.raishazahra.frontend.objects.patterns.entityStrategy.EntityMovementPattern;
+public class Enemy extends EntityShooter {
     private String name;
     private int hp;
     private int maxHp;
-
     protected long scoreValue;
-
     public Enemy(String name, int hp) {
-        super(
-            200,
-            380,
-            24,
-            24,
-            0,
-            Color.PINK
-        );
-
-        this.name = name;
-        this.hp = Math.max(0, hp);
-        this.maxHp = Math.max(0, hp);
-        this.scoreValue = 100L;
+        this(200, 380, 24, 24, Color.PINK, name, hp, 100L, null, null);
     }
-
     public Enemy(
-        float x,
-        float y,
-        float width,
-        float height,
-        Color color,
-        String name,
-        int hp,
-        long scoreValue
+        float x, float y, float width, float height,
+        Color color, String name, int hp, long scoreValue
     ) {
-        super(
-            x,
-            y,
-            width,
-            height,
-            0,
-            color
-        );
-
+        this(x, y, width, height, color, name, hp, scoreValue, null, null);
+    }
+    public Enemy(
+        float x, float y, float width, float height,
+        Color color, String name, int hp, long scoreValue,
+        ShootingPattern shootingPattern,
+        EntityMovementPattern movementPattern
+    ) {
+        super(x, y, width, height, 0f, color,
+            shootingPattern, movementPattern);
         this.name = name;
         this.hp = Math.max(0, hp);
         this.maxHp = Math.max(0, hp);
         this.scoreValue = scoreValue;
     }
-
     public boolean takeDamage(int damage) {
-
-        if (getHp() <= 0) {
-            return false;
-        }
-
-        int oldHp = getHp();
-
-        if (damage > 0) {
-            setHp(getHp() - damage);
-        }
-
-        return oldHp > 0 && getHp() == 0;
+        if (hp <= 0 || damage <= 0) return false;
+        int oldHp = hp;
+        hp = Math.max(0, hp - damage);
+        return oldHp > 0 && hp == 0;
     }
-
     public boolean isAlive() {
-        return hp > 0;
+        return hp > 0 && active;
     }
-
     public void attack(Player player) {
-        if (player != null) {
+        if (player != null && isAlive()) {
             player.takeDamage(10);
         }
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getHp() {
-        return hp;
-    }
-
-    public int getMaxHp() {
-        return maxHp;
-    }
-
-    public long getScoreValue() {
-        return scoreValue;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setHp(int hp) {
-        this.hp = Math.max(0, hp);
-    }
-
+    public String getName() { return name; }
+    public int getHp() { return hp; }
+    public int getMaxHp() { return maxHp; }
+    public long getScoreValue() { return scoreValue; }
+    public void setName(String name) { this.name = name; }
+    public void setHp(int hp) { this.hp = Math.max(0, hp); }
     public void setScoreValue(long scoreValue) {
         this.scoreValue = scoreValue;
     }
