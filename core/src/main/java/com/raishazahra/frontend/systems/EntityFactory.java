@@ -1,4 +1,3 @@
-
 package com.raishazahra.frontend.systems;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -14,126 +13,222 @@ import com.raishazahra.frontend.objects.items.ItemType;
 
 public class EntityFactory {
 
+    // =========================
+    // PLAYER
+    // =========================
+
     public static Player createPlayer(
-        float x, float y, String name,
-        int hp, int power, int spellCards
+        float x,
+        float y,
+        String name,
+        int hp,
+        int power,
+        int spellCards
     ) {
         Player player = new Player(
-            x, y, name, hp, power, spellCards
+            x,
+            y,
+            name,
+            hp,
+            power,
+            spellCards
         );
 
         Animation<TextureRegion> animation =
             AssetManager.getInstance().getAnimation("player_idle");
 
-        if (animation != null) {
-            player.setAnimation(animation);
-        }
+        player.setAnimation(animation);
 
         return player;
     }
 
-    public static Boss createBoss(
-        float x, float y, String name, int hp
-    ) {
-        Boss boss = new Boss(x, y, name, hp);
+    // =========================
+    // BOSS
+    // =========================
 
-        Animation<TextureRegion> idleAnim =
+    public static Boss createBoss(
+        float x,
+        float y,
+        String name,
+        int hp
+    ) {
+        Boss boss = new Boss(
+            x,
+            y,
+            name,
+            hp
+        );
+
+        Animation<TextureRegion> animation =
             AssetManager.getInstance().getAnimation("boss_idle");
 
-        if (idleAnim != null) {
-            boss.setAnimation(idleAnim);
-        }
+        boss.setAnimation(animation);
 
         return boss;
     }
 
+    // =========================
+    // FAIRY - DEFAULT ANIMATION
+    // =========================
+
     public static Fairy createFairy(
-        float x, float y, String name, int hp
+        float x,
+        float y,
+        String name,
+        int hp
     ) {
-        return createFairy(
-            x, y, name, hp, "fairy_idle_red"
+        Fairy fairy = new Fairy(
+            x,
+            y,
+            name,
+            hp
         );
-    }
 
-    public static Fairy createFairy(
-        float x, float y, String name,
-        int hp, String keyString
-    ) {
-        Fairy fairy = new Fairy(x, y, name, hp);
+        Animation<TextureRegion> animation =
+            AssetManager.getInstance().getAnimation("fairy_idle_red");
 
-        Animation<TextureRegion> idleAnim =
-            AssetManager.getInstance().getAnimation(keyString);
-
-        if (idleAnim != null) {
-            fairy.setAnimation(idleAnim);
-        }
+        fairy.setAnimation(animation);
 
         return fairy;
     }
 
-    public static Item createItem(
-        float x, float y, ItemType itemType
-    ) {
-        Item item = new Item(x, y, itemType);
+    // =========================
+    // FAIRY - CUSTOM ANIMATION
+    // =========================
 
-        String key = switch (itemType) {
-            case POWER -> "item_power";
-            case POINT -> "item_point";
-            case BOMB -> "item_bomb";
-            case LIFE -> "item_life";
-        };
+    public static Fairy createFairy(
+        float x,
+        float y,
+        String name,
+        int hp,
+        String animationKey
+    ) {
+        Fairy fairy = new Fairy(
+            x,
+            y,
+            name,
+            hp
+        );
+
+        Animation<TextureRegion> animation =
+            AssetManager.getInstance().getAnimation(animationKey);
+
+        fairy.setAnimation(animation);
+
+        return fairy;
+    }
+
+    // =========================
+    // ITEM
+    // =========================
+
+    public static Item createItem(
+        float x,
+        float y,
+        ItemType itemType
+    ) {
+        Item item = new Item(
+            x,
+            y,
+            itemType
+        );
+
+        String spriteKey;
+
+        switch (itemType) {
+            case POWER:
+                spriteKey = "item_power";
+                break;
+
+            case POINT:
+                spriteKey = "item_point";
+                break;
+
+            case BOMB:
+                spriteKey = "item_bomb";
+                break;
+
+            case LIFE:
+                spriteKey = "item_life";
+                break;
+
+            default:
+                spriteKey = "item_point";
+                break;
+        }
 
         TextureRegion sprite =
-            AssetManager.getInstance().getTextureRegion(key);
+            AssetManager.getInstance().getTextureRegion(spriteKey);
 
-        if (sprite != null) {
-            item.setSprite(sprite);
-        }
+        item.setSprite(sprite);
 
         return item;
     }
 
+    // =========================
+    // ENEMY BULLET
+    // =========================
+
     public static Bullet createEnemyBullet(
-        float x, float y, int damage
+        float x,
+        float y,
+        int damage
     ) {
         Bullet bullet = new Bullet(
-            x, y, 200f, BulletType.DANMAKU, damage
+            x,
+            y,
+            0f,
+            BulletType.DANMAKU,
+            damage
         );
 
         TextureRegion sprite =
-            AssetManager.getInstance()
-                .getTextureRegion("bullet_danmaku");
+            AssetManager.getInstance().getTextureRegion("bullet_danmaku");
 
-        if (sprite != null) {
-            bullet.setSprite(sprite);
-        }
+        bullet.setSprite(sprite);
 
         return bullet;
     }
 
-    public static Bullet createPlayerBullet(
-        float x, float y, int damage, String spriteKey
-    ) {
-        TextureRegion sprite =
-            AssetManager.getInstance()
-                .getTextureRegion(spriteKey);
+    // =========================
+    // PLAYER BULLET
+    // =========================
 
+    public static Bullet createPlayerBullet(
+        float x,
+        float y,
+        int damage,
+        String spriteKey
+    ) {
         Bullet bullet = new Bullet(
-            x, y, 400f, BulletType.AMULET, damage
+            x,
+            y,
+            BulletType.AMULET,
+            damage
         );
 
-        if (sprite != null) {
-            bullet.setSprite(sprite);
-        }
+        TextureRegion sprite =
+            AssetManager.getInstance().getTextureRegion(spriteKey);
+
+        bullet.setSprite(sprite);
 
         return bullet;
     }
 
+    // =========================
+    // PLAYER BULLET - DEFAULT
+    // =========================
+
     public static Bullet createPlayerBullet(
-        float x, float y, int damage
+        float x,
+        float y,
+        int damage
     ) {
         return createPlayerBullet(
-            x, y, damage, "bullet_amulet"
+            x,
+            y,
+            damage,
+            "bullet_amulet"
         );
     }
 }

@@ -17,7 +17,7 @@ public class Fairy extends Enemy {
         super(
             x, y, 32, 32, Color.PINK,
             name, hp, 500L,
-            new FrontShot(180f, 1, 10),
+            new FrontShot(180f, 1),
             new LinearEntityMovement(0f, -20f)
         );
     }
